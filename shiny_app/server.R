@@ -159,7 +159,6 @@ clean.all <- read.csv("data/sotc.csv")
 corr.dat <- read.csv("data/CEcor.csv")
 comm.facts <- read.csv("data/CommunityFacts.csv")
 
-#metrics <- c("CCE", "SAFETY", "EDUCATIO", "LEADERSH", "AESTHETI", "ECONOMY", "SOCIAL_O", "SOCIAL_C", "BASIC_SE", "INVOLVEM", "OPENNESS")
 metrics <- c("CCE", "SOCIAL_O", "OPENNESS", "AESTHETI", "EDUCATIO", "BASIC_SE", "LEADERSH", "ECONOMY", "SAFETY", "SOCIAL_C", "INVOLVEM")
 getMax <- function(data, met) {return(max(data[,met], na.rm = TRUE))}
 
@@ -167,36 +166,8 @@ getRegion <- function(city) {
     return(subset(comm.facts, Community == city)$Region)
 }
 
-# regions <- sapply(clean.all$QSB, getRegion)
-# clean.all <- data.frame(clean.all, Region = regions)
-# 
-# cor.2008 <- getCorMat(subset(clean.all, source == "sotc08"), "2008")
-# cor.2009 <- getCorMat(subset(clean.all, source == "sotc09"), "2009")
-# cor.2010 <- getCorMat(subset(clean.all, source == "sotc10"), "2010")
-# cor.agg <- getCorMat(clean.all, "Aggregate")
-# 
-# cor.all <- rbind(cor.2008, cor.2009, cor.2010, cor.agg)
-
-#meangf <- mean(subset(clean.all, QSB == "Grand Forks, ND")$EDUCATIO, na.rm = TRUE)
-#meanab <- mean(subset(clean.all, QSB == "Aberdeen, SD")$EDUCATIO, na.rm = TRUE)
-#meandu <- mean(subset(clean.all, QSB == "Duluth, MN")$EDUCATIO, na.rm = TRUE)
-#meansp <- mean(subset(clean.all, QSB == "St. Paul, MN")$EDUCATIO, na.rm = TRUE)
-#meanwi <- mean(subset(clean.all, QSB == "Wichita, KS")$EDUCATIO, na.rm = TRUE)
-#meanother <- mean(subset(clean.all, Region != "Great Plains")$EDUCATIO, na.rm = TRUE)
-
-#theseCities <- c("Grand Forks, ND", "Aberdeen, SD", "St. Paul, MN", "Duluth, MN", "Wichita, KS", "Other")
-#thisdf <- data.frame(City = factor(theseCities, levels = rev(theseCities)), MeanEducation = c(meangf, meanab, meansp, meandu, meanwi, meanother))
-
-#qplot(City, MeanEducation, data = thisdf, geom = "bar", fill = City, stat = "identity") +
-#    ylim(c(0, 3)) +
-#    coord_flip() +
-#    scale_fill_manual(values = rev(c("gold", "darkgreen", "darkgreen", "darkgreen", "darkgreen", "black"))) +
-#    theme(legend.position = "bottom")
-
-#ggsave("Hmm.png")
-
-addResourcePath('data', '~/ShinyApps/DataExpo2013/data')
-addResourcePath('css', '~/ShinyApps/DataExpo2013/css')
+addResourcePath('data', 'data')
+addResourcePath('css', 'css')
 
 shinyServer(function(input, output) {
     data <- function() {
