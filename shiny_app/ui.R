@@ -28,9 +28,7 @@ shinyUI(pageWithSidebar(
             checkboxInput("aggregate", "Aggregate all years", TRUE),
             conditionalPanel(
                 condition = "input.aggregate == false",
-                sliderInput("year", "Choose year:", 
-                            min = 2008, max = 2010, value = 2008, step = 1,
-                            format="####")
+                sliderInput("year", "Choose year:", min = 2008, max = 2010, value = 2008, step = 1, sep = "")
             ),
             checkboxInput("colorblind", "Colorblind safe", FALSE)
         ),
