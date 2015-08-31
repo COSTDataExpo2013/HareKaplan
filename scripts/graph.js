@@ -51,7 +51,7 @@ function do_stuff(el, data) {
     //map
     var width = $('#d3io').width() - 180,
             height = width*0.520833,
-            root, root_2008, root_2009, root_2010, subset, corr_dat,
+            root, subset, corr_dat,
             title_qsb, graphs_qsb,
             scale_resp, scale_color,
             circ_selected,
@@ -100,9 +100,7 @@ function do_stuff(el, data) {
 
         if(data) {
             root = JSON.parse(data.data_json);
-            root_2008 = JSON.parse(data.data_json_2008);
-            root_2009 = JSON.parse(data.data_json_2009);
-            root_2010 = JSON.parse(data.data_json_2010);
+            console.log(root);
             corr_dat = JSON.parse(data.data_json_corr);
 
             update_map();
@@ -170,10 +168,10 @@ function do_stuff(el, data) {
     function update_map() {
         if(root) {
             if($('#aggregate').is(':checked')) {
-                subset = root;
+                subset = root.all;
             } else {
                 year_select = $('#year').val();
-                subset = eval("root_" + year_select);
+                subset = root[year_select];
             }
 
             scale_resp = d3.scale.pow().exponent(0.6)
@@ -603,7 +601,7 @@ function do_stuff(el, data) {
             title_qsb.selectAll(".infocontainer").remove();
 
             var container = title_qsb.append("div").attr("class", "infocontainer");
-            var dataset = root.filter(function(e){ return e.QSB == circ_selected.QSB; })
+            var dataset = root.all.filter(function(e){ return e.QSB == circ_selected.QSB; })
 
             container.append("span").html("<span style='font-weight:bold; font-size:24px; margin-right: 5px'>" + dataset[0].QSB + "</span>" +
                                           "<strong> Urbanicity: </strong>" + dataset[0].Urbanicity + " | " +
