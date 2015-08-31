@@ -123,8 +123,7 @@ ggplot() +
 
 ## Same plot, slightly different color scheme
 ggplot(data = myrtle.dat, mapping = aes(x = disp_name, y = as.numeric(value), 
-                                      group = paste(order, QSB, sep=""), colour = Community), 
-       ) +
+                                      group = paste(order, QSB, sep=""), colour = Community)) +
     geom_line(aes(size = Community)) + 
     scale_size_manual(name = "Community",
                       values = c(1.5, 1, 1),

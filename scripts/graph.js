@@ -44,7 +44,7 @@ function do_stuff(el, data) {
 
 
     //slider
-    $('.jslider-pointer').mouseleave(function(){ setTimeout(function() { update_map(); update_graphs();}, 1000); });
+    $('.irs-with-grid span').mouseup(function(){ setTimeout(function() { update_map(); update_graphs();}, 1000); });
     $('#aggregate').mouseup(function(){ setTimeout(function() { update_map(); update_graphs();}, 1000); });
     $('.checkbox span').mouseup(function(){ setTimeout(function() { update_map(); update_graphs();}, 1000); }); //wonky checkbox clicking
 
@@ -54,7 +54,7 @@ function do_stuff(el, data) {
             root, root_2008, root_2009, root_2010, subset, corr_dat,
             title_qsb, graphs_qsb,
             scale_resp, scale_color,
-            year_select, circ_selected,
+            circ_selected,
             comms, comms_select,
             g, g_1, g_2, g_3,
             svg_1, svg_2, svg_3,
@@ -81,7 +81,7 @@ function do_stuff(el, data) {
     svg.append("rect")
         .attr("class", "background")
         .attr("width", width)
-        .attr("height", height)
+        .attr("height", height);
 
     g = svg.append("g");
 
@@ -117,7 +117,7 @@ function do_stuff(el, data) {
     var mx_button = d3.select('#buttons').selectAll('div')
         .data(metric).enter()
         .append("div")
-        .attr("class", "mx-button")
+        .attr("class", "mx-button");
 
     mx_button.append("input")
             .attr("type", "radio")
@@ -130,7 +130,7 @@ function do_stuff(el, data) {
             .text(function(d){ return d.disp_name; })
             .attr("unselectable", "");
 
-    mx_button.filter(function(d,i) { return(i == 0); }).selectAll("input")
+    mx_button.filter(function(d,i) { return(i === 0); }).selectAll("input")
         .attr("checked","");
 
 
@@ -227,7 +227,7 @@ function do_stuff(el, data) {
                 .text(function(d){ return(d.QSB); });
 
             if(first) {
-                comms.classed("selected", function(e, i) {return i == 0; });
+                comms.classed("selected", function(e, i) {return i === 0; });
 
                 circ_selected = d3.selectAll("circle.selected").data()[0];
 
@@ -274,7 +274,7 @@ function do_stuff(el, data) {
             .style("fill", "none")
             .style("stroke", "black")
             .style("stroke-opacity", 1e-6)
-            .style("stroke-width", 3)
+            .style("stroke-width", 3);
 
         comms_select.transition()
             .duration(750)
@@ -299,7 +299,7 @@ function do_stuff(el, data) {
             g_height_1 = $('.container-fluid').width()/3 + 60 - margin_1.top - margin_1.bottom;
 
             var x_1 = d3.scale.ordinal()
-                .rangeRoundBands([0, g_width_1], .1, .5);
+                .rangeRoundBands([0, g_width_1], 0.1, 0.5);
 
             var y_1 = d3.scale.linear()
                 .range([g_height_1, 0]);
@@ -315,7 +315,7 @@ function do_stuff(el, data) {
             var dataset_1 = [{ "x": circ_selected.QSB, "y": subset.filter(function(e){return e.QSB == circ_selected.QSB})[0][metric_select], "level": "city"},
                 { "x": circ_selected.URBAN_GR, "y": d3.mean(subset.filter(function(e){return e.URBAN_GR == circ_selected.URBAN_GR}), function(k) {return k[metric_select]}), "level": "urbanicity"},
                 { "x": circ_selected.Region, "y": d3.mean(subset.filter(function(e){return e.Region == circ_selected.Region}), function(k) {return k[metric_select]}), "level": "region"},
-                { "x": "All Cities", "y": d3.mean(subset, function(k) {return k[metric_select]}), "level": "all"}]
+                { "x": "All Cities", "y": d3.mean(subset, function(k) {return k[metric_select]}), "level": "all"}];
 
             g_1.attr("transform", "translate(" + margin_1.left + "," + margin_1.top + ")");
             x_1.domain(dataset_1.map(function(d) { return d.x; }));
@@ -331,7 +331,7 @@ function do_stuff(el, data) {
             g_1.selectAll(".x.axis").selectAll("text")
                 .style("text-anchor", "start")
                 .attr("transform", function(d) {
-                    return "rotate(45)"
+                    return "rotate(45)";
                 });
 
             g_1.append("g")
@@ -357,7 +357,7 @@ function do_stuff(el, data) {
                 .attr("width", x_1.rangeBand())
                 .attr("y", function(d) { return y_1(d.y); })
                 .attr("height", function(d) { return g_height_1 - y_1(d.y); })
-                .attr("opacity", function(d,i) {return i == level_select.index ? 1 : .5; });
+                .attr("opacity", function(d,i) {return i == level_select.index ? 1 : 0.5; });
 
     		bar.exit().remove();
 
@@ -381,12 +381,12 @@ function do_stuff(el, data) {
             .scale(y_2)
             .orient("left");
 
-        var dataset_2 = subset.slice(0)
+        var dataset_2 = subset.slice(0);
         dataset_2.sort(function(a, b){return a[metric_select] - b[metric_select]; });
 
         g_2.attr("transform", "translate(" + margin_2.left + "," + margin_2.top + ")");
         //x_2.domain([d3.min(dataset_2, function(d){return d[metric_select];}) - .5, d3.max(dataset_2, function(d){return d[metric_select];}) + .5]);
-        x_2.domain([1, metric.filter(function(e) {return e.var_name == metric_select;})[0].max])
+        x_2.domain([1, metric.filter(function(e) {return e.var_name == metric_select;})[0].max]);
         y_2.domain(dataset_2.map(function(d) { return d.QSB; }));
 
         g_2.selectAll(".axis").remove();
@@ -472,12 +472,12 @@ function do_stuff(el, data) {
             .append("text")
                 .attr("transform", "translate(" + (g_width_3 / 2) + " , " + 2*margin_3.bottom/3 + ")")
                 .style("text-anchor", "middle")
-                .text(dataset_3[0]["City"] + " - " + year_val);
+                .text(dataset_3[0].City + " - " + year_val);
 
             g_3.selectAll(".tick").selectAll("text")
                 .style("text-anchor", "start")
                 .attr("transform", function(d) {
-                    return "rotate(45)"
+                    return "rotate(45)";
                 });
 
 
@@ -501,7 +501,7 @@ function do_stuff(el, data) {
         					.attr("r", 3)
         					.attr("cx", function(d) { return x_3(d.x); })
         					.attr("cy", function(d) { return y_3(d.y); })
-        					.attr("opacity", .5);
+        					.attr("opacity", 0.5);
                 }
 
             var dot_3 = g_3.selectAll("circle.dot")
@@ -509,7 +509,7 @@ function do_stuff(el, data) {
 
             dot_3.enter().append("circle")
               .attr("class", "dot")
-              .attr("fill", function(d,i){ return color_scale(i); })
+              .attr("fill", function(d, i){ return color_scale(i); })
               .on("click", click_dot_3)
               .append("title")
                 .text(function(d){ return(d.x); });
