@@ -1,0 +1,96 @@
+This work was part of the American Statistical Association's Data Exposition 2013. The dataset came from the Knight Foundation's `Soul of the Community' project \citep{SOTC}. For this project, the Knight Foundation in conjunction with Gallup collected surveys from 43,000 people in the years 2008, 2009, and 2010, in 26 U.S. communities. Additional details on the 2013 Data Expo and the underlying data sets can be found in \cite{dataexpo}. A map of the 26 communities and the geographical regions to which we assigned them is displayed in Figure \ref{fig:region_map}. The regions are the Great Plains, the West, the Deep South, the Southeast, and the Rust Belt. These regions were not included as part of the dataset, but rather were our own constructs created by a graphical exploration of the locations of each community. We roughly based these regions on the US Census regions and divisions of the United States map \citep{Census}. We did not strictly adhere to state boundaries, but rather looked at the proximity of individual cities to the surrounding communities.
+
+<<region_map, echo=FALSE, fig.cap='Overview of the 26 Knight Foundation communities in which surveys were conducted. Assigned geographical regions are indicated by both color and shape. The Knight Foundation in conjunction with Gallup collected surveys from 43,000 people in the years 2008, 2009, and 2010 with the goal of understanding the association between community attributes and the degree of attachment people feel towards their community.', fig.pos='H', fig.width=1.5*6, fig.height=6, out.width='\\textwidth'>>=
+lats <- c(37.688889, 30.440608, 44.953703, 40.793395, 37.338978, 39.952335, 26.705621, 33.689060, 33.080143, 25.788969, 32.840695, 33.768321, 38.040584, 47.925257, 41.593370, 41.079273, 46.786672, 42.331427, 32.460976, 34.000710, 35.227087, 27.498928, 40.014986, 30.396032, 41.081445, 45.464698)   
+lons <- c(-97.336111, -84.286079, -93.089958, -77.860001, -121.894955, -75.163789, -80.036430, -78.886694, -83.232099, -80.226439, -83.632402, -118.195617, -84.503716, -97.032855, -87.346427, -85.139351, -92.100485, -83.045754, -84.987709, -81.034814, -80.843127, -82.574819, -105.270546, -88.885308, -81.519005, -98.486483)
+regions <- c("Great Plains", "Deep South", "Great Plains", "Rust Belt", "West", "Rust Belt", "Southeast", "Southeast", "Deep South",
+             "Southeast", "Deep South", "West", "Rust Belt", "Great Plains", "Rust Belt", "Rust Belt", "Great Plains",
+             "Rust Belt", "Deep South", "Southeast", "Southeast", "Southeast", "West", "Deep South", "Rust Belt", "Great Plains")
+
+states <- map_data("state")
+
+qplot(long, lat, data = states, group = group, geom = "polygon", fill = I("grey")) + 
+    geom_path(colour = I("white")) +
+    geom_point(data = data.frame(lats, lons, regions), inherit.aes = FALSE, size = I(7), aes(x = lons, y = lats, colour = regions, shape = regions, fill=regions)) +
+    scale_shape_manual(values = c(15:18, 25)) +
+    theme_bw() +
+    theme(aspect.ratio=1/1.75, legend.position = "bottom") +
+    theme(axis.ticks = element_blank(),
+          axis.line=element_blank(),
+          axis.text.x=element_blank(),
+          axis.text.y=element_blank(),
+          axis.title.x=element_blank(),
+          axis.title.y=element_blank(),
+          panel.border=element_blank(),
+          panel.grid.major=element_blank(),
+          panel.grid.minor=element_blank())
+@
+
+The survey contained raw responses as well as derived metrics that we used to gain insight into what makes a community thrive. The metrics we used can be found in Table~\ref{tab:metrics}. Each metric was calculated as a simple average of the response to anywhere from 2 to 6 questions. The metrics gave insight into how residents felt their community rated on various dimensions. For example, Education covered both public education as well as higher education in the community, while Social Offerings dealt with both nightlife as well as neighborliness. Community Attachment combined questions on how proud residents were to live in their community, if they would have recommended the community as a place to live, and how they predicted the community would be in five years. A score of 5 indicated the most positive response was given on all questions that this metric is derived from. We used the 10 metrics in Table~\ref{tab:metrics} to find relationships within types of communities to Community Attachment, as well as to explore any notable regional differences.
+
+
+\begin{table} \small
+\centering
+\caption{\label{tab:metrics} The metrics used from the Knight Foundation Soul of the Community survey \citep{SOTCSC}. All metrics are on a 1-3 scale except for Community Attachment, which is on a scale of 1-5. A higher score on any metric indicates the respondent replied positively to the associated questions.}
+\begin{tabular}{l p{.65\textwidth}}
+\hline
+Metrics & \\
+\hline
+\multirow{5}{*}{Community Attachment} &  I am proud to say I live in [Community]. \\
+& [Community] is the perfect place for people like me. \\
+& Taking everything into account, how satisfied are you with [Community] as a place to live? \\
+& How likely are you to recommend [Community] to a friend or associate as a place to live? \\
+& And thinking about five years from now, how do you think [Community] will be as a place to live compared to today? \\
+\hline
+\multirow{3}{*}{Social Offerings} & Having a vibrant nightlife with restaurants, clubs, bars, etc. \\
+& Being a good place to meet people and make friends \\
+& How much people in [Community] care about each other \\
+\hline
+\multirow{5}{*}{Openness} & Young, talented college graduates looking to enter the job market \\ 
+& Immigrants from other countries \\
+& Families with young children \\
+& Gay and lesbian people \\
+& Senior citizens \\
+\hline
+\multirow{2}{*}{Aesthetics} & The availability of outdoor parks, playgrounds, and trails \\
+& The beauty or physical setting \\
+\hline
+\multirow{2}{*}{Education} & The overall quality of public schools in your community \\
+& The overall quality of the colleges and universities \\
+\hline
+\multirow{3}{*}{Basic Services} & The highway and freeway system \\
+& The availability of affordable housing \\
+& The availability and accessibility of quality healthcare\\
+\hline
+\multirow{2}{*}{Leadership} & The leadership of the elected officials in your city \\
+& The leaders in my community represent my interests \\
+\hline
+\multirow{6}{*}{Economy} & The availability of job opportunities \\
+& How would you rate economic conditions in [Community] today? \\
+& Right now, do you think that economic conditions in [Community] as a whole are getting better or getting worse? \\
+& How likely are you to agree that your job provides you with the income needed to support your 
+family? \\
+& Now is a good time to find a job in my area \\
+& How satisfied are you with your job, that is, the work you do? \\
+\hline
+\multirow{2}{*}{Safety} & How would you rate how safe you feel walking alone at night within a mile of your home? \\
+& How would you rate the level of crime in your community? \\
+\hline
+\multirow{4}{*}{Social Capital} & How many formal or informal groups or clubs do you belong to, in your area, that meet at least monthly? \\
+& How many of your close friends live in your community? \\
+& How much of your family lives in this area? \\
+& How often do you talk to or visit with your immediate neighbors? \\
+\hline
+\multirow{4}{*}{Civic Involvement} & Performed local volunteer work for any organization or group \\
+& Attended a local public meeting in which local issues were discussed \\
+& Voted in the local election \\
+& Worked with other residents to make change in the local community\\
+\hline 
+\end{tabular}
+\end{table}
+
+The goal of our work was to facilitate understanding of why people feel attachment to their communities through the use of an interactive and web-based visualization. Specifically, we took the point of view of a community planner, either from one of the communities in the study or from a community in the same region or a similar urbanicity. By putting the user in the driver seat of their own experience, we allow the user to apply the conclusions of their interaction to their own situation. The purpose of interaction is to discover what the data has to tell the world. We did not attempt to draw statistical conclusions about the data, thus we did not use the survey weights provided in the data in our analysis. Because the communities are sparsely and unevenly distributed throughout the United States, we felt an exploratory approach would help us to sift through the data and discover its patterns.
+
+Many of the discoveries in the data were readily apparent, while others required some more investigation. In the words of John Tukey, ``Exploratory data analysis is detective work - numerical detective work - or counting detective work - or \emph{graphical detective work}." \citep{tukey77} Dynamic, interactive visualizations can empower people to explore the data for themselves as well as encourage engagement with the data in a way that static visualizations cannot. Additionally, linking multiple visualizations shows different aspects of a complex data set and helps highlight relationships. By allowing actions in one plot to affect elements in other plots, comparisons are made easy for the user without requiring much memorization. This aids in pattern finding by reducing cognitive load. In addition to wanting it to be easy to explore the data, we wanted the tool to be easy to use. A web-based application is platform-independent and allows the user to employ the tool without any software to download. Additionally, by building an application that works on all modern browsers and operating systems, there are no limitations on who can use the tool. Finally, automatic feature additions and bug fixes can be completed transparently to the user.
+
+To fully engage the user with our work and facilitate the emergence of interesting or descriptive patterns we created CommuniD3 (available at \url{http://andeek.shinyapps.io/CommuniD3}), an interactive web-based tool that relies heavily on the idea of linked plots. A linked plot will adapt to changes made in other plots within the collection, creating a dynamic and interactive set of graphics. Different visualizations illustrate different aspects of the data, and linking helps regain the multidimensional aspect of the data \citep{buja1991interactive}. In the following section (Section 2) we discuss the structure and tools used to build CommuniD3. Section 3 highlights an application of CommuniD3 in finding interesting stories across the Unitied States. We finish with a conclusion in Section 4.

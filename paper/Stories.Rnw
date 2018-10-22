@@ -1,0 +1,221 @@
+In this section, we illustrate a specific example of how CommuniD3 can be used to highlight interesting features in the data. We then proceed by showing other interesting findings in the data, aided by the use of CommuniD3. 
+
+We elected to divide our analysis using two primary factors. The first was the geographic region the community was located in, and the second was the urbanicity of the particular community. Urbanicity is a census designation which was provided in the dataset, while regions were determined by us. The interactive tool was then used to help us discover a story in the data for each of the five regions.
+
+\subsection{Great Plains - Effect of Quality Education}
+<<gp_one, echo=FALSE, results='hide'>>=
+clean.all.merge <- merge(clean.all, comm.facts, by.x = "QSB", by.y = "Community")
+plains.dat <- subset(clean.all.merge, Region == "Great Plains")
+
+clean.all.merge$plainsQSB <- with(clean.all.merge, ifelse(as.character(Region) == "Great Plains", as.character(QSB), "Other"))
+clean.all.merge$plainsQSB <- factor(clean.all.merge$plainsQSB, levels=c("Aberdeen, SD","Duluth, MN","Grand Forks, ND","St. Paul, MN","Wichita, KS","Other"))
+
+all.years.city$plainsQSB <- with(all.years.city, ifelse(as.character(Region) == "Great Plains", as.character(QSB), "Other"))
+
+plains.dat <- ddply(melt(all.years.city[,c("year","CCE","EDUCATIO","plainsQSB")], id.vars=c("year", "plainsQSB")), .(year, plainsQSB, variable), summarise, value=mean(as.numeric(value)))
+plains.dat$disp_name <- with(plains.dat, ifelse(variable == "CCE", "Community Attachment", "Education"))
+plains.dat$disp_name <- factor(plains.dat$disp_name, levels=c("Education", "Community Attachment"))
+plains.dat$plainsQSB <- factor(plains.dat$plainsQSB, levels=c("Aberdeen, SD", "Duluth, MN", "Grand Forks, ND", "St. Paul, MN", "Wichita, KS", "Other"))
+
+ugh <- cbind(subset(plains.dat, variable == "EDUCATIO"), CCE=subset(plains.dat, variable == "CCE")[,4])
+names(ugh)[2] <- "Community"
+@
+The five communities comprising the Great Plains were Grand Forks, ND, Duluth, MN, Aberdeen, SD, Saint Paul, MN, and Wichita, KS. Through use of CommuniD3, we quickly discovered that the individuals in this region rated the quality of education in the community more highly. Figures~\ref{fig:greatplains_1}, \ref{fig:greatplains_2}, and \ref{fig:greatplains_3} illustrate the sequence of steps in CommuniD3 which led to that conclusion.
+
+You recommend wish to follow along in CommuniD3 as we describe the steps taken. First, we click on Saint Paul, as shown in panel (1). We examine the bar charts of Community Attachment displayed in panel (2), which indicates the Great Plains region has an overall higher attachment than the average of all other cities.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{images/greatplains_1.png}
+\caption{\label{fig:greatplains_1} (1) Select Saint Paul  (2) Focus on the comparison of Community Attachment in Saint Paul with other cities that have geographical or cultural similarities. Conclude that Saint Paul is more attached than most of its counterparts.}
+\end{figure}
+
+We can then look at the plot of correlations of panel (3), demonstrating that the Great Plains communities have an overall larger correlation between Education and Community Attachment than the average of all communities. This leads to switching the metric of interest in CommuniD3 to Education, and an examination of the ordered dot plot of panel (4). This plot makes clear that while Saint Paul is strong in education (ranking fourth of all communities), three other communities particularly stand out.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{images/greatplains_2.png}
+\caption{\label{fig:greatplains_2} (3) Focus on the correlation between Community Attachment and the other metrics in Saint Paul to identify Education as particularly important.  (4) Compare the mean value for education in Saint Paul with the other cities.}
+\end{figure}
+
+At this point, the story of the Education metric in the Great Plains becomes clear. Panel (5) illustrates the bar chart that was first shown in panel (2), but this time with regards to Education. Saint Paul, despite ranking fourth overall, actually has a slightly lower value for this metric than does the Great Plains communities aggregated. This is explained by the fact that the Great Plains communities stand above the rest, averaging 2.2 out of 3 in Education compared to about 2.0 for the average of all cities. Our final step is to click on the Great Plains bar, which immediately highlights the Great Plains communities in the ordered dot plot as shown in panel (6).
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{images/greatplains_3.png}
+\caption{\label{fig:greatplains_3} (5) Focus on how the mean value for Education is larger than the mean value for all communities aggregated.  (6) Examine the comparison of all cities to observe that three of the top four communities in Education are located in the Great Plains.}
+\end{figure}
+
+It is quickly evident that Grand Forks, Aberdeen, and Saint Paul comprise three of the top four communities in the Education metric, helping to explain the fact that the Great Plains has the overall largest Community Attachment among the regions we considered.
+
+A similar approach was taken for the other four regions, leading to the conclusions presented in this paper. Henceforth, we illustrate the findings in static graphics and tables for ease of presentation, all of which were motivated and discovered through use of CommuniD3.
+
+\subsection{West - Urbanicity and Openness}
+Another focus of our analysis was the influence of the Urbanicity designations of the communities. In the West region, which comprises Boulder, CO, San Jose, CA, and Long Beach, CA, we found some evidence of an urbanicity-specific metric correlated with attachment.
+
+Table \ref{tbl:open_table} displays the top five communities by the Openness Metric. First, it can be seen that the three communities comprising the West Region were all in the top five for Openness. Second, Boulder and Long Beach each have the urbanicity of "Very high urbanicity-medium population". These communities consist of a relatively modest population, but where most of whom live in the urban core of the city. Figure \ref{fig:west_one} displays a two-dimensional bin plot of Community Attachment versus Openness, displaying only the communities with the designation "Very high urbanicity-medium population". Areas of darker red have a higher frequency of responses than those that are white. Notice that both Boulder and Long Beach had more respondents indicating a high Community Attachment and a high Openness. By comparison, Akron, OH, and Gary, IN, two communities in the Rust Belt region with the same urbanicity, had much lower ratings on both of these scales. Bradenton, FL had many citizens highly attached to the community, but somewhat lower ratings for Openness compared to Boulder and Long Beach. Ultimately, communities in the West region with this urbanicity designation placed a higher value on the Openness of their community than do other communities of similar size in the rest of the country.
+
+<<open_table, echo=FALSE, results='asis'>>=
+sub.df <- subset(all.melt, year == "Aggregate" & variable == "OPENNESS")[,-c(1, 4, 6)]
+sub.df <- sub.df[with(sub.df, rev(order(value))), ]
+comms <- sub.df[1:5, 2]
+regions <- sub.df[1:5,1]
+sub.test <- as.numeric(sub.df[1:5, 3])
+urban <- c("Very high urbanicity-medium population", "Very high urbanicity-large population", "Very high urbanicity-large population", "Medium/low urbanicity-low population", "Very high urbanicity-medium population")
+
+sub.df2 <- data.frame(comms, regions, urban, sub.test)
+names(sub.df2) <- c("Community", "Region", "Urbanicity", "Openness")
+
+print(xtable(sub.df2, digits = 2, label = "tbl:open_table", caption = "Top Five Communities by the Openness Metric. Note that three of the communities are from the West region"), table.position = "H", include.rownames = FALSE, caption.placement = "top")
+@
+
+<<west_one, echo=FALSE, fig.cap='2D binned plot of responses for Openness and Community Attachment among the five communities with Very high urbanicity-medium population designations. Communities in the West region with this urbanicity designation placed a higher value on the Openness of their community than do other communities of similar size in the rest of the country.', fig.pos='H', fig.height=6>>=
+west.dat <- subset(clean.all.merge, Urbanicity == "Very high urbanicity-medium population")
+west.dat$QSB <- factor(west.dat$QSB, levels=c("Boulder, CO", "Akron, OH", "Bradenton, FL", "Long Beach, CA", "Gary, IN"))
+
+numsamp <- min(ddply(west.dat, .(QSB), summarise, num = length(plainsQSB))$num)
+new.df <- ldply(c("Boulder, CO", "Akron, OH", "Bradenton, FL", "Long Beach, CA", "Gary, IN"), function(x){subset(west.dat, QSB == x)[sample(1:nrow(subset(west.dat, QSB == x)), size = numsamp), ]})
+new.df$Region <- "West"
+new.df$Region[new.df$QSB %in% c("Akron, OH", "Bradenton, FL", "Gary, IN")] <- "Other"
+
+ggplot(data=new.df) +
+    #geom_jitter(aes(x = OPENNESS, y= CCE, colour=Region)) + facet_wrap(~QSB, nrow=3) +
+    geom_bin2d(binwidth = c(0.15, 0.15), aes(x = OPENNESS, y = CCE)) + facet_wrap(~QSB, nrow = 2) +
+    scale_fill_gradient(low = I("white"), high = I("red")) +
+    ylab("Community Attachment") + xlab("Openness") +
+    theme_bw() + coord_fixed()
+@
+
+\subsection{Deep South - The Safety Angle}
+Exploring trends in the Deep South communities of Macon, GA, Milledgeville, GA, Columbus, GA, Tallahassee, FL, and Biloxi, MS quickly suggested that residents of these communities were displeased with the Safety of the community. In 2008, Macon and Columbus ranked third and fourth worst respectively among all 26 communities in terms of Safety. By 2010, the situation degraded further, as Macon declined to the overall worst Safety rating, while Milledgeville ranked third worst, and Columbus remained the fourth worst. Biloxi was a notable exception, however, ranking eighth best in 2010. Biloxi also exceeded its fellow Deep South communities in terms of Social Offerings, ranking second best amongst all communities in each of the three years the survey was conducted, and by far the best amongst the communities in the Deep South.
+
+As it turns out, Biloxi also had the highest overall Community Attachment rating in the Deep South. Figure \ref{fig:ds_one} displays the average rating from 2008 to 2010 in terms of Safety, Social Offerings, and Community Attachment. Biloxi is highlighted in red, the other Deep South communities are highlighted in blue, and the rest of the communities are highlighted in gray. The stark difference between Biloxi and the rest of the Deep South is readily apparent, and helps to explain why Community Attachment was quite high in Biloxi.
+
+<<ds_one, echo=FALSE, fig.cap='Responses across the three years for Safety, Social Offerings, and Community Attachment. The stark difference between Biloxi and the rest of the Deep South in terms of Safety and Social Offerings is readily apparent. This helps to explain why Community Attachment was quite high in Biloxi.', fig.pos='H', fig.width=7, fig.height=5>>=
+south.dat <- cbind(subset(all.years.city, year != "Aggregate"), Community = with(subset(all.years.city, year != "Aggregate"), ifelse(QSB == "Biloxi, MS", "Biloxi, MS", ifelse(Region == "Deep South", "Deep South", "Other"))))
+south.dat$Community <- factor(south.dat$Community, levels=c("Biloxi, MS", "Deep South", "Other"))
+south.dat.melt <- melt(south.dat[, c("year", "QSB", "Community", "SAFETY", 'SOCIAL_O', "CCE")], id.vars=c("year", "QSB", "Community"))
+south.dat.melt$disp_name <- apply(south.dat.melt, 1, function(x) ifelse(x["variable"] == "CCE", "Community Attachment", ifelse(x["variable"] == "SOCIAL_O", "Social Offerings", "Safety")))
+south.dat.melt$disp_name <- factor(south.dat.melt$disp_name, levels=c("Safety", "Social Offerings", "Community Attachment"))
+south.dat.melt$year <- as.numeric(south.dat.melt$year)
+ggplot() + 
+    geom_line(data = subset(south.dat.melt, Community == "Other"), 
+              aes(x = year, y = as.numeric(value), group = QSB, colour=Community), 
+              size = 1) + 
+    geom_point(data = subset(south.dat.melt, Community == "Other"),
+               aes(x=year, y=as.numeric(value), 
+                   colour = Community, shape = Community), size = 2, inherit.aes = FALSE) +
+    geom_line(data = subset(south.dat.melt, Community == "Deep South"),
+              aes(x=year, y=as.numeric(value), group = QSB, 
+                  colour = Community), inherit.aes = FALSE, size = 1) + 
+    geom_point(data = subset(south.dat.melt, Community == "Deep South"),
+               aes(x=year, y=as.numeric(value), 
+                   colour = Community, shape = Community), size = I(2), inherit.aes = FALSE) +
+    geom_text(data = subset(south.dat.melt, Community == "Deep South" & year == 2008),
+              aes(x=rep(I(2006.5), nrow(subset(south.dat.melt, Community == "Deep South" & year == 2008))), y=as.numeric(value), label=QSB,
+                  colour = Community), hjust=0, vjust=0, size=2.5, inherit.aes = FALSE) +
+    geom_line(data = subset(south.dat.melt, Community == "Biloxi, MS"),
+              aes(x=year, y=as.numeric(value), group = QSB, 
+                  colour = Community), inherit.aes = FALSE, size = 1.5) + 
+    geom_point(data = subset(south.dat.melt, Community == "Biloxi, MS"),
+               aes(x=year, y=as.numeric(value), 
+                   colour = Community, shape = Community), size = I(4), inherit.aes = FALSE) + facet_wrap(~disp_name, scales="free_y") + 
+  geom_text(data = subset(south.dat.melt, Community == "Biloxi, MS" & year == 2008),
+              aes(x=rep(I(2006.5), nrow(subset(south.dat.melt, Community == "Biloxi, MS" & year == 2008))), y=as.numeric(value), label=QSB,
+                  colour = Community), hjust=0, vjust=0, size=2.5, inherit.aes = FALSE) +
+    xlab("") + ylab("") + 
+    scale_colour_manual(name = "Community",
+                        values = c("#FF3300","#000066","darkgrey"),
+                        breaks = c("Biloxi, MS", "Deep South", "Other"),
+                        labels = c("Biloxi, MS", "Deep South", "Other")) +
+    scale_shape_manual(name = "Community",
+                        values = c(16, 15, 17),
+                        breaks = c("Biloxi, MS", "Deep South", "Other"),
+                        labels = c("Biloxi, MS", "Deep South", "Other")) +
+    theme_bw() +
+    theme(legend.position = "bottom") +
+    scale_x_continuous(breaks=2008:2010)
+@
+
+\subsection{Southeast - Social Offerings in Myrtle Beach}
+In the Deep South, we saw some evidence suggesting Biloxi's high rating for Social Offerings may have contributed to a strong sense of attachment in that community. Nowhere is this phenomenon more prominent than in the Southeast region, where Myrtle Beach, SC is located. Myrtle Beach was the fifth most attached community amongst all communities in the dataset. However, Myrtle Beach did no better than 13th in all other metrics with the exception of Social Offerings, where it was ranked first. In other words, residents of Myrtle Beach felt the Social Offerings in their community were very strong, while most other metrics, including Aesthetics, Openness, Safety, and Education were poor. Figure \ref{fig:southeast_one} illustrates this phenomenon with a parallel coordinate plot. The mean value for all metrics is displayed for each of the communities, with Myrtle Beach highlighted in green, and other Southeast communities highlighted in blue. The metrics are sorted from high to low by the average value for each metric amongst all the communities. Notice that Myrtle Beach fairly closely tracked the rest of the communities in all metrics except for Social Offerings, where a sizable ``jump'' can be observed.
+
+<<southeast_one, echo=FALSE, fig.cap='Mean value of metric for each community. Myrtle Beach is highlighted in green, and the other communities in the Southeast are highlighted in blue. Myrtle Beach stands closely tracked the rest of the communities in all metrics except for Social Offerings, where they were the highest rated.', fig.pos='H', fig.height=5>>=
+myrtle.dat <- cbind(subset(all.melt, year == "Aggregate"), Community = with(subset(all.melt, year == "Aggregate"), ifelse(QSB == "Myrtle Beach, SC", "Myrtle Beach, SC", ifelse(Region == "Southeast", "Southeast", "Other"))))
+myrtle.dat$disp_name <- factor(myrtle.dat$disp_name, levels=unique(as.character(myrtle.dat$disp_name)))
+myrtle.dat$Community.f <- factor(myrtle.dat$Community, levels=c("Myrtle Beach, SC", "Southeast", "Other"))
+myrtle.dat$order <- with(subset(all.melt, year == "Aggregate"), ifelse(QSB == "Myrtle Beach, SC", 2, ifelse(Region == "Southeast", 1, 0)))
+
+labels <- list("Aesthetics"=subset(myrtle.dat, disp_name=="Aesthetics")[which.min(as.numeric(myrtle.dat[myrtle.dat$disp_name=="Aesthetics",]$value)),c("QSB", "value")],
+               "Education"=subset(myrtle.dat, disp_name=="Education")[which.max(as.numeric(myrtle.dat[myrtle.dat$disp_name=="Education",]$value)),c("QSB", "value")],
+               "Social Offerings"=subset(myrtle.dat, disp_name=="Social Offerings")[which.min(as.numeric(myrtle.dat[myrtle.dat$disp_name=="Social Offerings",]$value)),c("QSB", "value")],
+               "Safety"=subset(myrtle.dat, disp_name=="Safety")[which.max(as.numeric(myrtle.dat[myrtle.dat$disp_name=="Safety",]$value)),c("QSB", "value")],
+               "Economy"=subset(myrtle.dat, disp_name=="Economy")[which.min(as.numeric(myrtle.dat[myrtle.dat$disp_name=="Economy",]$value)),c("QSB", "value")])
+
+ggplot() + 
+    geom_line(data = subset(myrtle.dat, Community == "Other"), 
+              aes(x = disp_name, y = as.numeric(value), group = QSB, colour = Community.f), 
+                  size = I(1), alpha = 0.5) + 
+    geom_point(data = subset(myrtle.dat, Community == "Other"),
+               aes(x=disp_name, y=as.numeric(value), 
+               colour = Community.f, shape = Community.f), size = I(2), inherit.aes = FALSE) +
+    geom_line(data = subset(myrtle.dat, Community == "Southeast"),
+              aes(x=disp_name, y=as.numeric(value), group = QSB, 
+              colour = Community.f), inherit.aes = FALSE, size = 1) + 
+    geom_point(data = subset(myrtle.dat, Community == "Southeast"),
+              aes(x=disp_name, y=as.numeric(value), 
+               colour = Community.f, shape = Community.f), size = I(2), inherit.aes = FALSE) +
+    geom_line(data = subset(myrtle.dat, Community == "Myrtle Beach, SC"),
+              aes(x=disp_name, y=as.numeric(value), group = QSB, 
+              colour = Community.f), inherit.aes = FALSE, size = 1.5) + 
+    geom_point(data = subset(myrtle.dat, Community == "Myrtle Beach, SC"),
+               aes(x=disp_name, y=as.numeric(value), 
+               colour = Community.f, shape = Community.f), size = I(4), inherit.aes = FALSE) +
+    geom_text(data=labels[["Aesthetics"]], aes(x="Aesthetics", y=as.numeric(value) - .1, label=QSB), colour="darkgrey", size=3.5) +
+  geom_text(data=labels[["Education"]], aes(x="Education", y=as.numeric(value) + .1, label=QSB), colour="darkgrey", size=3.5) +
+  geom_text(data=labels[["Social Offerings"]], aes(x="Social Offerings", y=as.numeric(value) - .1, label=QSB), colour="darkgrey", size=3.5) +
+    geom_text(data=labels[["Safety"]], aes(x="Safety", y=as.numeric(value) + .1, label=QSB), colour="darkgrey", size=3.5) +
+    geom_text(data=labels[["Economy"]], aes(x="Economy", y=as.numeric(value) - .1, label=QSB), colour="darkgrey", size=3.5) +
+    xlab("") + ylab("Metric Value - Aggregated Years") +
+    scale_colour_manual(name = "Community",
+                        values = c("#0cae3a","darkgrey","#0066cc"),
+                        breaks = c("Myrtle Beach, SC", "Southeast", "Other"),
+                        labels = c("Myrtle Beach, SC", "Southeast", "Other")) +
+    scale_shape_manual(name = "Community",
+                        values = c(16, 17, 15),
+                        breaks = c("Myrtle Beach, SC", "Southeast", "Other"),
+                        labels = c("Myrtle Beach, SC", "Southeast", "Other")) +
+    theme_bw() +
+    theme(axis.text.x = element_text(angle = 65, hjust = 1), legend.position = "bottom")
+@
+
+The question remains of how Myrtle Beach had such highly attached citizens when only Social Offerings appeared to be a positive metric for the community. The reason is that Social Offerings was the single most highly correlated metric with Community Attachment in 23 out of the 26 communities, including Myrtle Beach.
+
+\subsection{Rust Belt - The Economic Collapse}
+As the data covered the period from 2008 to 2010, we hoped to find some stories relating to the economic collapse, or the Great Recession, which began in 2008. We focused on the Economy metric in the Rust Belt communities, and noted a largely negative view of economic conditions in this region, particularly in its economic center, Detroit, MI. Table \ref{tbl:econ} displays the average response on a 1-3 scale for Economy in the Rust Belt communities across each of the three years. It can be seen that although all Rust Belt communities experienced a drop in attitude about the economy between 2008 and 2009, Detroit's was noticeably smaller. By 2010, attitudes about the economy began to improve. This can also be seen by examining Figure \ref{fig:rb_one}, a density plot of values for Economy in each of the communities in the three years.
+
+<<econ, echo=FALSE, results='asis'>>=
+tbl <- subset(all.melt, Region == "Rust Belt" & variable == "ECONOMY" & year != "Aggregate")[,c(3, 1, 5)]
+names(tbl) <- c("Community", "Year", "Economy")
+tbl$Economy <- as.numeric(tbl$Economy)
+
+new.tbl <- dcast(tbl, Community ~ Year, value.var = "Economy")
+names(new.tbl)[3] <- "Ugh"
+new.tbl <- arrange(new.tbl, Ugh)
+names(new.tbl)[3] <- "2009"
+
+print(xtable(new.tbl, digits = c(2, 0, 2, 2, 2), label = "tbl:econ", caption = "The average value for the Economy metric in the five Rust Belt communities in each of the three years, sorted by the aggregated mean value for all three years. Notice the large drop in economic outlook for all cities in the Rust Belt from 2008 to 2009. Detroit, however, dropped only 0.01 in average economic outlook in that timespan."), table.position = "H", include.rownames = FALSE, caption.placement = "top")
+@
+
+<<rb_one, echo=FALSE, fig.cap='Density of responses for Economy in Rust Belt communities over each of the three years. It appears that Detroit experiences a modest recovery in terms of economic outlook from 2009 to 2010 that the other communities in the Rust Belt did not experience.', fig.pos='H', warning=FALSE>>=
+rust.dat <- subset(clean.all.merge, Region == "Rust Belt")
+rust.dat$detroit_f <- rust.dat$QSB == "Detroit, MI"
+rust.dat$year <- with(rust.dat, ifelse(source == "sotc08", 2008, ifelse(source == "sotc09", 2009, 2010)))
+rust.dat$QSB <- factor(rust.dat$QSB, levels = new.tbl$Community)
+ggplot() +
+    geom_density(data=rust.dat, aes(x=ECONOMY, group=factor(year), fill=factor(year), colour=factor(year)), position="dodge", alpha=I(0.4)) +
+    facet_grid(QSB~year) + 
+    xlab("Economy") + ylab("Density of Responses") + scale_colour_discrete(name="year") + scale_fill_discrete(name="year") + theme_bw() + theme(legend.position = "off", strip.text.y = element_text(size = 7))
+@
+
+What this table and plot suggests is that although it is widely believed that Detroit was hit especially hard by the economic collapse, there was a bit of resillience in the 2009 and 2010 time frame. Attitudes in Detroit were low regarding the economy in 2008, but did not exhibit much worsening in 2009, and began to improve in 2010. Perhaps the automotive bailouts, which were passed and signed into law in 2009, may be a reasonable explanation for why this occurred in America's ``Motor City".

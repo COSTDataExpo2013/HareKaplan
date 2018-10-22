@@ -1,0 +1,41 @@
+To visually understand attachment, we created an interactive web-based application. The construction and design of CommuniD3 are detailed in the following sections. First the user interface is described and then we discuss the wide range of technology we used to construct the tool.
+
+CommuniD3 is comprised of three parts, \begin{inparaenum}[(1)]
+\item Side panel, 
+\item Map Panel, and
+\item Plot panel,
+\end{inparaenum}
+as seen in Figure~\ref{fig:tool}.
+As the user interacts with each piece, the other portions of the interface update to reflect the interaction. In this way we have built an interactive graphical framework, rather than an animation.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{images/tool.png}
+\caption{\label{fig:tool} The components that make up CommuniD3, (1) Side panel, (2) Map panel, and (3) Plot panel.}
+\end{figure}
+
+\begin{enumerate}[(1)]
+\item
+The {\bf side panel} houses two features. The first is the ability to investigate the data for individual years versus aggregated across all three years. In this way we are able to explore attitude changes across the three years surveyed as well as overarching trends in the regions and urbanicities. The second is a colorblind friendly option that uses a red-blue color scheme on the map rather than red-green to accommodate more users.
+\item
+The {\bf map panel} is the central piece of the application. The 26 communities surveyed are plotted geographically on a map of the United States. The size of each dot represents the number of surveys for the chosen time period, while the color shading of each dot corresponds to the average value for each community in the chosen time period for the metric selected. The panel on the right allows the user to change the metric displayed. Additionally, each community is clickable. On click, basic information about that community is displayed below the map panel and the plot panel is updated to reflect the community that is clicked. It is our goal for a community planner to be able to start with the map panel and find a community that was surveyed that corresponds to the community they are interested about, or one that is nearby, as a means to delve into the driving factors of community attachment.
+\item
+The {\bf plot panel} is a set of three linked plots that detail three aspects of the dataset. The first plot is a bar graph showing the average value of the metric selected for the year range selected for the community selected as well as for its urbanicity and its region. For example, once Detroit, MI is the community in focus, the urbanicity is ``Very high urbanicity-very large population'' and the region is the Rust Belt. The fourth bar in the chart represents the aggregation of all the communities serves as a reference. While the bar chart is a plot that shows surface information, its true purpose here is to control the information displayed in the other two plots. As the user clicks on the bars, the other two plots display information pertaining to the level selected (either region, urbanicity, or the whole dataset). The middle plot is an ordered dot plot displaying the average value for the metric selected for all communities with the level selected in the bar chart highlighted. See Figure~\ref{fig:dots} for an example of the different levels of highlighting. The third plot is a plot of pairwise correlations between each metric and community attachment for the level of aggregation (year and community/region/urbanicity). The small grey dots serve as a reference level in the background that displays the correlation for every survey aggregated to ease comparison for the user. The three plots are linked in such a way that selection through clicking in one plot will affect all three plots and potentially the map panel. In this manner, the user can truly drive their experience and take ownership of their analysis.
+\end{enumerate}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{images/dots.png}
+\caption{\label{fig:dots} Examples of the different types of highlighting available in the ordered dot plot from the plot panel. The highlighting corresponds to (1) community selection, (2) urbanicity selection, (3) region selection, and (4) all community selection. In this example, Detroit, MI has been selected to display the values of community attachment for all three years, 2008-2010.}
+\end{figure}
+
+\subsection{The Shoulders of Giants}
+We incorporated several pioneering technologies in the creation of our application that allowed us to find insights in the dataset. \texttt{Shiny} \citep{rs-shiny} is an {\tt R} package created by RStudio that enables {\tt R} users to create an interactive web application that utilizes {\tt R} as the background engine. In CommuniD3, \texttt{Shiny} is used as the framework upon which the application sits. \texttt{D3} \citep{mb-d3} stands for ``Data Driven Documents" and is a JavaScript library developed and maintained by Mike Bostock with the purpose of visualizing and interacting with data in a web-based interface. We used \texttt{D3} and JavaScript to create the visualizations as well as to control all the user interaction with the application. The graphics and user interface are all stored entirely on the client side, allowing for seamless transitions of the graphics. See Figure~\ref{fig:D3shiny} for a diagram of the ways \texttt{Shiny} and \texttt{D3} are used in CommuniD3.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{images/D3shiny.png}
+\caption{\label{fig:D3shiny} Diagram of the uses of \texttt{D3} and \texttt{Shiny} in CommuniD3, specifically focusing on client versus server utilization. \texttt{D3} and JavaScript are used to create the visualizations, as well as control the user interaction. \texttt{Shiny} and the associated {\tt R} packages are the framework on which the application is built.}
+\end{figure}
+
+We also leveraged other {\tt R} packages to help with data manipulation. We used \texttt{plyr} \citep{plyr}, \texttt{reshape2} \citep{reshape2}, and \texttt{rjson} \citep{rjson} to split and aggregate metric values according to the levels selectable by the user before passing the data to the client side in the JSON format. For subsequent analysis after using CommuniD3 we used the {\tt R} packages \texttt{ggplot2} \citep{ggplot2} and \texttt{maps} \citep{maps} to dive deeper into the interesting findings from the application.

@@ -1,0 +1,227 @@
+\documentclass{svjour3}
+
+%AMS-TeX packages
+%\usepackage{amssymb,amsmath,amsthm} 
+%geometry (sets margin) and other useful packages
+\usepackage{graphicx, ctable, booktabs}
+\usepackage{color}
+\usepackage{listings}
+\usepackage{ltablex, calc, enumerate, multirow, float, soul, paralist}
+\usepackage{hyperref, url}
+\usepackage{longtable, pdflscape, textcase}
+
+\usepackage[round]{natbib}
+
+\begin{document}
+
+<<concordance, echo=FALSE>>=
+library(knitr)
+opts_chunk$set(fig.align = "center", message=FALSE, warning=FALSE)
+opts_knit$set(self.contained=FALSE)
+@
+
+<<libraries, cache=FALSE, echo=FALSE, message=FALSE, warning=FALSE>>=
+library(plyr)
+library(ggplot2)
+library(RColorBrewer)
+library(reshape2)
+library(xtable)
+library(maps)
+library(dplyr)
+@
+
+<<readdata, echo=FALSE, cache=TRUE, warning=FALSE>>=
+enumerateMetrics <- function(...) {
+    return(paste(unlist(lapply(c(...), function(met){return(paste(met, " = mean(", met, ", na.rm = TRUE", ")", sep = ""))})), collapse = ", "))
+}
+
+getUrbanity <- function(data, city) {
+    return(subset(data, QSB == city)$URBAN_GR)
+}
+
+clean.all <- read.csv("../shiny_app/data/sotc.csv")
+corr.dat <- read.csv("../shiny_app/data/CEcor.csv")
+comm.facts <- read.csv("../shiny_app/data/CommunityFacts.csv")
+metrics <- data.frame(var_name = c("CCE", "AESTHETI", "SOCIAL_C", "INVOLVEM", "EDUCATIO", "SOCIAL_O", "OPENNESS", "SAFETY", "BASIC_SE", "ECONOMY", "LEADERSH"),
+                      disp_name = c("Community Attachment", "Aesthetics", "Social Capital", "Civic Involvement", "Education", "Social Offerings", "Openness", "Safety", "Basic Services", "Economy", "Leadership"))
+
+expr.all <- paste(as.expression(paste("ddply(clean.all, .(QSB, URBAN_GR), summarise, ")), enumerateMetrics(as.character(metrics$var_name)), ", TOTALRESP = length(GENDER))", sep = "")
+expr.2008 <- paste(as.expression(paste("ddply(subset(clean.all, source == \"sotc08\"), .(QSB, URBAN_GR), summarise, ")), enumerateMetrics(as.character(metrics$var_name)), ", TOTALRESP = length(GENDER))", sep = "")
+expr.2009 <- paste(as.expression(paste("ddply(subset(clean.all, source == \"sotc09\"), .(QSB, URBAN_GR), summarise, ")), enumerateMetrics(as.character(metrics$var_name)), ", TOTALRESP = length(GENDER))", sep = "")
+expr.2010 <- paste(as.expression(paste("ddply(subset(clean.all, source == \"sotc10\"), .(QSB, URBAN_GR), summarise, ")), enumerateMetrics(as.character(metrics$var_name)), ", TOTALRESP = length(GENDER))", sep = "")
+
+clean.all.city <- eval(parse(text = expr.all))
+clean.2008.city <- eval(parse(text = expr.2008))
+clean.2009.city <- eval(parse(text = expr.2009))
+clean.2010.city <- eval(parse(text = expr.2010))
+
+lats <- c(37.688889, 30.440608, 44.953703, 40.793395, 37.338978, 39.952335, 26.705621, 33.689060, 33.080143, 25.788969, 32.840695, 33.768321, 38.040584, 47.925257, 41.593370, 41.079273, 46.786672, 42.331427, 32.460976, 34.000710, 35.227087, 27.498928, 40.014986, 30.396032, 41.081445, 45.464698)   
+lons <- c(-97.336111, -84.286079, -93.089958, -77.860001, -121.894955, -75.163789, -80.036430, -78.886694, -83.232099, -80.226439, -83.632402, -118.195617, -84.503716, -97.032855, -87.346427, -85.139351, -92.100485, -83.045754, -84.987709, -81.034814, -80.843127, -82.574819, -105.270546, -88.885308, -81.519005, -98.486483)
+
+clean.all.city$lats <- rev(lats)
+clean.all.city$lons <- rev(lons)
+clean.2008.city$lats <- rev(lats)
+clean.2008.city$lons <- rev(lons)
+clean.2009.city$lats <- rev(lats)
+clean.2009.city$lons <- rev(lons)
+clean.2010.city$lats <- rev(lats)
+clean.2010.city$lons <- rev(lons)
+
+clean.all.city.merge <- merge(clean.all.city, comm.facts, by.x = "QSB", by.y = "Community")
+clean.2008.city.merge <- merge(clean.2008.city, comm.facts, by.x = "QSB", by.y = "Community")
+clean.2009.city.merge <- merge(clean.2009.city, comm.facts, by.x = "QSB", by.y = "Community")
+clean.2010.city.merge <- merge(clean.2010.city, comm.facts, by.x = "QSB", by.y = "Community")
+
+#Sandbox    
+all.years.city <- rbind(cbind(year=rep(2008, nrow(clean.2008.city.merge)), clean.2008.city.merge),
+                        cbind(year=rep(2009, nrow(clean.2009.city.merge)), clean.2009.city.merge),
+                        cbind(year=rep(2010, nrow(clean.2010.city.merge)), clean.2010.city.merge),
+                        cbind(year=rep("Aggregate", nrow(clean.all.city.merge)), clean.all.city.merge)
+)
+
+all.melt <- subset(melt(all.years.city, id.vars = c("year", "Region", "QSB")), variable %in% as.character(metrics$var_name))
+all.melt$disp_name <- apply(all.melt, 1, function(a) {metrics$disp_name[metrics$var_name == as.character(a["variable"])]})
+all.melt$disp_name <- factor(all.melt$disp_name, levels=unique(as.character(all.melt$disp_name)))
+@
+
+<<new_plots, echo=FALSE, eval=FALSE>>=
+clean.all.urban <- ddply(clean.all.city, .(URBAN_GR), summarise, CCE = mean(CCE), EDUCATIO = mean(EDUCATIO))
+names(clean.all.urban)[1] <- "QSB"
+
+clean.all.city$REGION <- comm.facts$Region
+clean.all.region <- ddply(clean.all.city, .(REGION), summarise, CCE = mean(CCE), EDUCATIO = mean(EDUCATIO))
+names(clean.all.region)[1] <- "QSB"
+
+clean.all.all <- data.frame(QSB = "All Cities", CCE = mean(clean.all.city$CCE), EDUCATIO = mean(clean.all.city$EDUCATIO))
+
+clean.all.comb <- rbind(clean.all.city[,c(1, 3, 7)], clean.all.urban, clean.all.region, clean.all.all)
+
+clean.all.city$ispaul <- (clean.all.city$QSB == "St. Paul, MN")
+clean.all.city$isgp <-  ifelse(clean.all.city$QSB %in% c("Grand Forks, ND", "Aberdeen, SD", "St. Paul, MN", "Duluth, MN", "Wichita, KS"), "gp", "none")
+clean.all.city$isgp[clean.all.city$QSB == "St. Paul, MN"] <- "sp"
+
+cols <- c("#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd", "#8c564b", "#e377c2", "#7f7f7f", "#bcbd22", "#17becf")
+
+clean.all.comb$ispaul <- (clean.all.comb$QSB == "St. Paul, MN")
+clean.all.comb$isgp <- (clean.all.comb$QSB == "Great Plains")
+
+plot2 <- qplot(QSB, CCE, stat = "identity", geom = "bar", data = subset(clean.all.comb, QSB %in% c("St. Paul, MN", "Very high urbanicity-large population", "Great Plains", "All Cities")), fill = QSB, alpha = ispaul) +
+    coord_cartesian(ylim=c(1,5)) +
+    scale_y_continuous(breaks = seq(1, 5, by = 0.5)) +
+    scale_alpha_manual(values = c(0.5, 1)) +
+    xlab("") +
+    ylab("Community Attachment") +
+    scale_fill_manual(values = cols[1:4]) +
+    theme_bw() +
+    theme(legend.position = "off", axis.text.x = element_text(angle = -45, vjust = 0.9, hjust = 0.1), panel.grid.major = element_blank(), panel.grid.minor = element_blank(), text = element_text(size=20))
+
+corr.dat.agg <- subset(corr.dat, Year == "Aggregate")
+corr.melt <- melt(corr.dat.agg, id.vars = c("Year", "City"))
+corr.melt$variable <- as.character(corr.melt$variable)
+sapply(metrics$var_name, function(met){
+    corr.melt$variable[corr.melt$variable == met] <<- as.character(metrics$disp_name[metrics$var_name == met])
+})
+corr.melt$variable <- factor(corr.melt$variable, levels = c("Social Offerings", "Openness", "Aesthetics", "Education", "Basic Services", "Leadership", "Economy", "Safety", "Social Capital", "Civic Involvement"))
+
+plot3 <- ggplot() +
+    geom_point(data = subset(corr.melt, City == "All Cities"), aes(x = variable, y = value), inherit.aes = FALSE, colour = "grey") +
+    geom_point(aes(x = variable, y = value, colour = variable), size = I(3), data = subset(corr.melt, City == "St. Paul, MN")) +
+    scale_colour_manual(values = cols) +
+    scale_y_continuous(limits = c(-1, 1), breaks = seq(-1, 1, by = 0.2)) +
+    xlab("") +
+    ylab("Correlation with Community Attachment") +
+    theme_bw() +
+    theme(legend.position = "off", axis.text.x = element_text(angle = -45, vjust = 0.9, hjust = 0.1), panel.grid.major = element_blank(), panel.grid.minor = element_blank(), text = element_text(size=20))
+
+clean.all.city$QSB <- factor(clean.all.city$QSB, levels = arrange(clean.all.city, EDUCATIO)$QSB)
+plot4 <- qplot(QSB, EDUCATIO, geom = "point", colour = ispaul, data = clean.all.city, size = ispaul) +
+    scale_colour_manual(values = c("Grey", cols[1])) +
+    scale_size_manual(values = c(2, 3)) +
+    coord_flip() +
+    scale_y_continuous(limits = c(1, 3), breaks = seq(1, 3, by = 0.2)) +
+    xlab("") +
+    ylab("Education") +
+    theme_bw() +
+    theme(legend.position = "off", panel.grid.major = element_blank(), panel.grid.minor = element_blank(), text = element_text(size=20))
+
+plot5 <- qplot(QSB, EDUCATIO, stat = "identity", geom = "bar", data = subset(clean.all.comb, QSB %in% c("St. Paul, MN", "Very high urbanicity-large population", "Great Plains", "All Cities")), fill = QSB, alpha = isgp) +
+    coord_cartesian(ylim=c(1,3)) +
+    scale_alpha_manual(values = c(0.5, 1)) +
+    scale_y_continuous(breaks = seq(1, 3, by = 0.2)) +
+    xlab("") +
+    ylab("Education") +
+    scale_fill_manual(values = cols[1:4]) +
+    theme_bw() +
+    theme(legend.position = "off", axis.text.x = element_text(angle = -45, vjust = 0.9, hjust = 0.1), panel.grid.major = element_blank(), panel.grid.minor = element_blank(), text = element_text(size=20))
+
+plot6 <- qplot(QSB, EDUCATIO, geom = "point", colour = isgp, data = clean.all.city, size = isgp) +
+    scale_colour_manual(values = c(cols[3], "Grey", cols[1])) +
+    scale_size_manual(values = c(3, 2, 3)) +
+    coord_flip() +
+    scale_y_continuous(limits = c(1, 3), breaks = seq(1, 3, by = 0.2)) +
+    xlab("") +
+    ylab("Education") +
+    theme_bw() +
+    theme(legend.position = "off", panel.grid.major = element_blank(), panel.grid.minor = element_blank(), text = element_text(size=20))
+
+ggsave(filename = "plot2.png", plot = plot2, width=3.61, height=3.74, scale = 2)
+ggsave(filename = "plot3.png", plot = plot3, width=3.61, height=3.74, scale = 2)
+ggsave(filename = "plot4.png", plot = plot4, width=3.61, height=3.74, scale = 2)
+ggsave(filename = "plot5.png", plot = plot5, width=3.61, height=3.74, scale = 2)
+ggsave(filename = "plot6.png", plot = plot6, width=3.61, height=3.74, scale = 2)
+@
+
+
+\setlength{\parskip}{3ex}
+\setlength{\parindent}{0pt}
+
+\title{Putting Down Roots: A Graphical Exploration of Community Attachment}
+\titlerunning{Putting Down Roots} 
+
+\author{Andee J. Kaplan \and Eric R. Hare}
+
+\institute{A. Kaplan \at
+          Department of Statistics \\
+          Iowa State University \\
+          \email{andrea.kaplan@duke.edu}           %  \\
+          \and
+          E. Hare \at
+          Department of Statistics \\
+          Iowa State University \\
+          \email{eric@omnianalytics.io}
+}
+
+\date{Received: XXX / Accepted: XXX}
+
+\maketitle
+
+\begin{abstract}
+In this paper, we explore the relationships that individuals have with their communities. This work was prepared as part of the ASA Data Expo `13 sponsored by the Graphics Section and the Computing Section, using data provided by the Knight Foundation Soul of the Community survey. The Knight Foundation in cooperation with Gallup surveyed 43,000 people over three years in 26 communities across the United States with the intention of understanding the association between community attributes and the degree of attachment people feel towards their community. These include the different facets of both urban and rural communities, the impact of quality education, and the trend in the perceived economic conditions of a community over time. The goal of our work is to facilitate understanding of why people feel attachment to their communities through the use of an interactive and web-based visualization. We will explain the development and use of web-based interactive graphics, including an overview of the R package \texttt{Shiny} and the JavaScript library \texttt{D3}, focusing on the choices made in producing the visualizations and technical aspects of how they were created. Then we describe the stories about community attachment that unfolded from our analysis.
+\keywords{Interactive graphics \and shiny \and D3 \and Linked plots}
+\end{abstract}
+
+\clearpage
+
+\setcounter{page}{1}
+
+\section{Introduction}
+<<introduction, child='Introduction.Rnw'>>=
+@
+
+\section{A Graphical User Interface}
+<<technology, child='Technology.Rnw'>>=
+@
+
+\section{Stories}
+<<stories, child='Stories.Rnw'>>=
+@
+
+\section{Conclusion}
+<<conclusion, child='Conclusion.Rnw'>>=
+@
+
+\clearpage
+
+\bibliographystyle{plainnat}     % basic style, author-year citations
+\bibliography{refs.bib}
+\end{document}
