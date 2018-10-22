@@ -9,4 +9,4 @@ This repository contains supplementary material for the paper "Putting Down Root
 * The **css** folder contains the files for styling the web application.
 * The **data** folder contains the Knight Foundation data as well as the cleaned datasets used in the `shiny` application and the paper, **clean_sotc.RData**
 * The **scripts** folder contains the JavaScript file (**graph.js**) used to create the interactive graphs in the `shiny` application
-* The **server.R** and **ui.R** files build the `shiny` application and use the file structure in this repo. To run the application locally, use the `shiny::run_app()` command within this directory.
+* The **server.R** and **ui.R** files build the `shiny` application and use the file structure in this repo. To run the application locally, use the `shiny::runApp()` command within this directory.
