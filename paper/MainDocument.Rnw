@@ -197,7 +197,7 @@ ggsave(filename = "plot6.png", plot = plot6, width=3.61, height=3.74, scale = 2)
 
 \begin{abstract}
 In this paper, we explore the relationships that individuals have with their communities. This work was prepared as part of the ASA Data Expo `13 sponsored by the Graphics Section and the Computing Section, using data provided by the Knight Foundation Soul of the Community survey. The Knight Foundation in cooperation with Gallup surveyed 43,000 people over three years in 26 communities across the United States with the intention of understanding the association between community attributes and the degree of attachment people feel towards their community. These include the different facets of both urban and rural communities, the impact of quality education, and the trend in the perceived economic conditions of a community over time. The goal of our work is to facilitate understanding of why people feel attachment to their communities through the use of an interactive and web-based visualization. We will explain the development and use of web-based interactive graphics, including an overview of the R package \texttt{Shiny} and the JavaScript library \texttt{D3}, focusing on the choices made in producing the visualizations and technical aspects of how they were created. Then we describe the stories about community attachment that unfolded from our analysis.
-\keywords{Interactive graphics \and shiny \and D3 \and Linked plots}
+\keywords{Soul of the Community \and Data Expo 2013 \and Interactive graphics \and shiny \and D3}
 \end{abstract}
 
 \clearpage
